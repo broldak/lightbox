@@ -1,3 +1,17 @@
+.photos-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.photos-container img {
+  cursor: pointer;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.photos-container img:hover {
+  opacity: 0.85;
+}
+
 .lightbox-container,
 .lightbox-layover {
   position: fixed;
@@ -34,20 +48,31 @@
   position: relative;
 }
 
+.lightbox-modal button {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: white;
+}
+
 .lightbox-modal .close-btn {
   position: absolute;
-  right: 4px;
-  top: 4px;
+  right: -64px;
+  top: -64px;
+  font-size: 36px;
+}
+
+.lightbox-modal .back-btn,
+.lightbox-modal .next-btn {
+  position: absolute;
+  font-size: 36px;
+  top: 50%;
 }
 
 .lightbox-modal .back-btn {
-  position: absolute;
-  left: 0;
-  bottom: 0;
+  left: -64px;
 }
 
 .lightbox-modal .next-btn {
-  position: absolute;
-  right: 0;
-  bottom: 0;
+  right: -64px;
 }
