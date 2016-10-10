@@ -39,3 +39,15 @@
   right: 4px;
   top: 4px;
 }
+
+.lightbox-modal .back-btn {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+.lightbox-modal .next-btn {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}

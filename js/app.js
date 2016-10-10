@@ -51,6 +51,7 @@ var LightBox = function() {
   var photoUrls = [];
   var state = {
   	openedPhoto: null,
+    photoIndex: -1,
     isFetchingPhotos: false,
     photosPopulated: false,
   };
@@ -95,44 +96,55 @@ var LightBox = function() {
   }
 
   function onPhotoClick(evt) {
-  	console.log(evt);
-    debugger;
-
     if (evt.target.tagName.toLowerCase() === 'img') {
-    	debugger;
-
       // find selected photo
       var clicked = photoUrls.filter(function(photo) {
       	return photo.id === evt.target.getAttribute('data-photo-id');
       })[0];
 
       state.openedPhoto = clicked;
+      state.photoIndex = photoUrls.indexOf(clicked);
 
       showOpenedPhoto();
-
-      debugger;
     }
   }
 
   function onLightboxClick(evt) {
   	console.log(evt);
+    console.log(state);
     debugger;
+    var lightBox = utils.find('.lightbox-layover')[0];
+    var modal = utils.find('.lightbox-container')[0];
 
-    if (evt.target.tagName.toLowerCase() === 'button') {
-    	debugger;
-
-      var lightBox = utils.find('.lightbox-layover')[0];
-      var modal = utils.find('.lightbox-container')[0];
-
+    if (evt.target.tagName.toLowerCase() === 'button' && evt.target.className.includes('close-btn')) {
       lightBox.className = 'lightbox-layover';
       modal.className = 'lightbox-container';
+    }
 
+    if (evt.target.tagName.toLowerCase() === 'button' && evt.target.className.includes('back-btn')) {
       debugger;
+      state.photoIndex -= 1;
+      state.openedPhoto = photoUrls[state.photoIndex];
+
+      updateOpenedPhoto();
+    }
+
+    if (evt.target.tagName.toLowerCase() === 'button' && evt.target.className.includes('next-btn')) {
+      debugger;
+      state.photoIndex += 1;
+      state.openedPhoto = photoUrls[state.photoIndex];
+
+      updateOpenedPhoto();
     }
   }
 
+  function updateOpenedPhoto() {
+    var modalImage = utils.find('.lightbox-img')[0];
+
+    modalImage.src = state.openedPhoto.url;
+  }
+
   function showOpenedPhoto() {
-  	debugger;
     console.log(state);
 
     var lightBox = utils.find('.lightbox-layover')[0];
@@ -143,8 +155,6 @@ var LightBox = function() {
 
     lightBox.className += ' active';
     modal.className += ' active';
-
-    debugger;
   }
 
 	return ({
@@ -169,7 +179,7 @@ var LightBox = function() {
       // Add event listener to container for clicks on photos
       var photosContainer = utils.find(ui.photos)[0];
       var lightboxModal = utils.find('.lightbox-modal')[0];
-      debugger;
+
       photosContainer.addEventListener('click', onPhotoClick.bind(this));
       lightboxModal.addEventListener('click', onLightboxClick.bind(this));
     }
