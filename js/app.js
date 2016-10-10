@@ -16,7 +16,7 @@
 
 (function(window) {
 	var API_KEY = '0d0f6df1cd5e73df831dc1da03f15250';
-	var url = 'https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=' + API_KEY + '&format=json&per_page=10&nojsoncallback=1';
+	var url = 'https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=' + API_KEY + '&format=json&per_page=50&nojsoncallback=1';
 
 	window.flickr = {
   	fetchPhotos: function() {
@@ -113,26 +113,30 @@ var LightBox = function() {
     var lightBox = utils.find('.lightbox-layover')[0];
     var modal = utils.find('.lightbox-container')[0];
 
-    if (evt.target.tagName.toLowerCase() === 'button' && evt.target.className.includes('close-btn')) {
-      lightBox.className = 'lightbox-layover';
-      modal.className = 'lightbox-container';
-    }
+    if (evt.target.tagName.toLowerCase() === 'button') {
+      var className = evt.target.className;
 
-    if (evt.target.tagName.toLowerCase() === 'button' && evt.target.className.includes('back-btn')) {
-      if (state.photoIndex - 1 >= 0) {
-        state.photoIndex -= 1;
-        state.openedPhoto = photoUrls[state.photoIndex];
-
-        updateOpenedPhoto();
+      if (className.includes('close-btn')) {
+        lightBox.className = 'lightbox-layover';
+        modal.className = 'lightbox-container';
       }
-    }
 
-    if (evt.target.tagName.toLowerCase() === 'button' && evt.target.className.includes('next-btn')) {
-      if (state.photoIndex + 1 < photoUrls.length) {
-        state.photoIndex += 1;
-        state.openedPhoto = photoUrls[state.photoIndex];
+      if (className.includes('back-btn')) {
+        if (state.photoIndex - 1 >= 0) {
+          state.photoIndex -= 1;
+          state.openedPhoto = photoUrls[state.photoIndex];
 
-        updateOpenedPhoto();
+          updateOpenedPhoto();
+        }
+      }
+
+      if (className.includes('next-btn')) {
+        if (state.photoIndex + 1 < photoUrls.length) {
+          state.photoIndex += 1;
+          state.openedPhoto = photoUrls[state.photoIndex];
+
+          updateOpenedPhoto();
+        }
       }
     }
   }
