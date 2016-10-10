@@ -110,9 +110,6 @@ var LightBox = function() {
   }
 
   function onLightboxClick(evt) {
-  	console.log(evt);
-    console.log(state);
-    debugger;
     var lightBox = utils.find('.lightbox-layover')[0];
     var modal = utils.find('.lightbox-container')[0];
 
@@ -122,19 +119,21 @@ var LightBox = function() {
     }
 
     if (evt.target.tagName.toLowerCase() === 'button' && evt.target.className.includes('back-btn')) {
-      debugger;
-      state.photoIndex -= 1;
-      state.openedPhoto = photoUrls[state.photoIndex];
+      if (state.photoIndex - 1 >= 0) {
+        state.photoIndex -= 1;
+        state.openedPhoto = photoUrls[state.photoIndex];
 
-      updateOpenedPhoto();
+        updateOpenedPhoto();
+      }
     }
 
     if (evt.target.tagName.toLowerCase() === 'button' && evt.target.className.includes('next-btn')) {
-      debugger;
-      state.photoIndex += 1;
-      state.openedPhoto = photoUrls[state.photoIndex];
+      if (state.photoIndex + 1 < photoUrls.length) {
+        state.photoIndex += 1;
+        state.openedPhoto = photoUrls[state.photoIndex];
 
-      updateOpenedPhoto();
+        updateOpenedPhoto();
+      }
     }
   }
 
@@ -145,8 +144,6 @@ var LightBox = function() {
   }
 
   function showOpenedPhoto() {
-    console.log(state);
-
     var lightBox = utils.find('.lightbox-layover')[0];
     var modal = utils.find('.lightbox-container')[0];
     var modalImage = utils.find('.lightbox-img')[0];
@@ -159,7 +156,6 @@ var LightBox = function() {
 
 	return ({
   	init: function() {
-     debugger;
       var ui = {
       	photos: '.photos-container',
         lightBox: '.lightbox-container'
@@ -167,9 +163,7 @@ var LightBox = function() {
 
       // Fetch photos then create templates then add them to container
     	flickr.fetchPhotos().then(function(response) {
-      	var photos = JSON.parse(response).photos;
-        debugger;
-        return photos;
+      	return JSON.parse(response).photos;
       }).then(function(photos){
       	photoUrls = resolvePhotoUrls(photos);
 
