@@ -1,3 +1,6 @@
+Lightbox
+========
+
 A basic lightbox app. Reads from flickr API and displays photos.
 
 Things you can do:
