@@ -1,3 +1,4 @@
+// DOM manipulation helpers
 (function(window) {
 	window.utils = {
   	find: function(selector) {
@@ -14,6 +15,7 @@
   }
 }(this));
 
+// Flickr API helper
 (function(window) {
 	var API_KEY = '0d0f6df1cd5e73df831dc1da03f15250';
 	var url = 'https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=' + API_KEY + '&format=json&per_page=50&nojsoncallback=1';
@@ -44,17 +46,87 @@
   }
 }(this));
 
+// Lightbox App
 var LightBox = function() {
 	var selectedPhoto;
 	var utils = window.utils;
   var flickr = window.flickr;
   var photoUrls = [];
+
+  // Object representing some ui element classes
+  var ui = {
+    photos: '.photos-container',
+    lightBox: '.lightbox-container',
+    lightboxModal: '.lightbox-modal',
+    lightboxLayover: '.lightbox-layover',
+    lightboxImg: '.lightbox-img'
+  };
+
+  // Object representing state of the app
   var state = {
   	openedPhoto: null,
     photoIndex: -1,
     isFetchingPhotos: false,
     photosPopulated: false,
+    isLightboxOpen: false,
   };
+
+  // Event handler for clicks on photos container
+  function onPhotoClick(evt) {
+    if (evt.target.tagName.toLowerCase() === 'img') {
+      // find selected photo
+      var clicked = photoUrls.filter(function(photo) {
+      	return photo.id === evt.target.getAttribute('data-photo-id');
+      })[0];
+
+      state.openedPhoto = clicked;
+      state.photoIndex = photoUrls.indexOf(clicked);
+
+      showOpenedPhoto(false);
+    }
+  }
+
+  // Event handler for keydown
+  function onKeyDown(evt) {
+    if (state.isLightboxOpen) {
+      switch (evt.keyCode) {
+        // Right arrow
+        case 39:
+          showNextPhoto();
+          break;
+        // Left arrow
+        case 37:
+          showPreviousPhoto();
+          break;
+        // Escape
+        case 27:
+          closeLightbox();
+          break;
+      }
+    }
+  }
+
+  // Event handler for clicks in lightbox modal
+  function onLightboxClick(evt) {
+    if (evt.target.tagName.toLowerCase() === 'button') {
+      var className = evt.target.className;
+
+      // Close button
+      if (className.includes('close-btn')) {
+        closeLightbox();
+      }
+
+      // Back button
+      if (className.includes('back-btn')) {
+        showPreviousPhoto();
+      }
+
+      // Next button
+      if (className.includes('next-btn')) {
+        showNextPhoto();
+      }
+    }
+  }
 
   // Take in array of photo objects and return array of photo urls
   function resolvePhotoUrls(photos) {
@@ -80,7 +152,12 @@ var LightBox = function() {
       img.src = photo.url;
       img.setAttribute('data-photo-id', photo.id)
 
-      return img;
+      // Create wrapping element
+      var div = document.createElement('div');
+      div.className = 'photo-wrap';
+      div.appendChild(img);
+
+      return div;
     });
 
     return photoTemplates;
@@ -88,87 +165,65 @@ var LightBox = function() {
 
   // Take in array of img elements and append each to the photos container
   function addPhotos(templates) {
-  	var photosContainer = utils.find('.photos-container')[0];
+  	var photosContainer = utils.find(ui.photos)[0];
 
     templates.forEach(function(template) {
       photosContainer.appendChild(template);
     });
   }
 
-  function onPhotoClick(evt) {
-    if (evt.target.tagName.toLowerCase() === 'img') {
-      // find selected photo
-      var clicked = photoUrls.filter(function(photo) {
-      	return photo.id === evt.target.getAttribute('data-photo-id');
-      })[0];
+  // Close lightbox
+  function closeLightbox() {
+    var lightBox = utils.find(ui.lightboxLayover)[0];
+    var modal = utils.find(ui.lightBox)[0];
 
-      state.openedPhoto = clicked;
-      state.photoIndex = photoUrls.indexOf(clicked);
+    lightBox.className = 'lightbox-layover';
+    modal.className = 'lightbox-container';
+    state.isLightboxOpen = false;
+  }
 
-      showOpenedPhoto();
+  // Decremenet photoIndex and display previous photo
+  function showPreviousPhoto() {
+    if (state.photoIndex - 1 >= 0) {
+      state.photoIndex -= 1;
+      state.openedPhoto = photoUrls[state.photoIndex];
+
+      showOpenedPhoto(true);
     }
   }
 
-  function onLightboxClick(evt) {
-    var lightBox = utils.find('.lightbox-layover')[0];
-    var modal = utils.find('.lightbox-container')[0];
+  // Increase photoIndex and display next photo
+  function showNextPhoto() {
+    if (state.photoIndex + 1 < photoUrls.length) {
+      state.photoIndex += 1;
+      state.openedPhoto = photoUrls[state.photoIndex];
 
-    if (evt.target.tagName.toLowerCase() === 'button') {
-      var className = evt.target.className;
-
-      if (className.includes('close-btn')) {
-        lightBox.className = 'lightbox-layover';
-        modal.className = 'lightbox-container';
-      }
-
-      if (className.includes('back-btn')) {
-        if (state.photoIndex - 1 >= 0) {
-          state.photoIndex -= 1;
-          state.openedPhoto = photoUrls[state.photoIndex];
-
-          updateOpenedPhoto();
-        }
-      }
-
-      if (className.includes('next-btn')) {
-        if (state.photoIndex + 1 < photoUrls.length) {
-          state.photoIndex += 1;
-          state.openedPhoto = photoUrls[state.photoIndex];
-
-          updateOpenedPhoto();
-        }
-      }
+      showOpenedPhoto(true);
     }
   }
 
-  function updateOpenedPhoto() {
-    var modalImage = utils.find('.lightbox-img')[0];
-
-    modalImage.src = state.openedPhoto.url;
-  }
-
-  function showOpenedPhoto() {
-    var lightBox = utils.find('.lightbox-layover')[0];
-    var modal = utils.find('.lightbox-container')[0];
-    var modalImage = utils.find('.lightbox-img')[0];
+  // Show current opened photo
+  function showOpenedPhoto(isUpdate) {
+    var lightBox = utils.find(ui.lightboxLayover)[0];
+    var modal = utils.find(ui.lightBox)[0];
+    var modalImage = utils.find(ui.lightboxImg)[0];
 
     modalImage.src = state.openedPhoto.url;
 
-    lightBox.className += ' active';
-    modal.className += ' active';
+    if (!isUpdate) {
+      state.isLightboxOpen = true;
+      lightBox.className += ' active';
+      modal.className += ' active';
+    }
   }
 
 	return ({
   	init: function() {
-      var ui = {
-      	photos: '.photos-container',
-        lightBox: '.lightbox-container'
-      };
-
       // Fetch photos then create templates then add them to container
     	flickr.fetchPhotos().then(function(response) {
       	return JSON.parse(response).photos;
       }).then(function(photos){
+        // Resolve urls for photos
       	photoUrls = resolvePhotoUrls(photos);
 
         return createPhotoTemplates(photoUrls);
@@ -176,14 +231,11 @@ var LightBox = function() {
 
       // Add event listener to container for clicks on photos
       var photosContainer = utils.find(ui.photos)[0];
-      var lightboxModal = utils.find('.lightbox-modal')[0];
+      var lightboxModal = utils.find(ui.lightboxModal)[0];
 
       photosContainer.addEventListener('click', onPhotoClick.bind(this));
       lightboxModal.addEventListener('click', onLightboxClick.bind(this));
+      window.addEventListener('keydown', onKeyDown.bind(this));
     }
   });
 }
-
-var lb = LightBox();
-
-lb.init();
